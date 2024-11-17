@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: "no"
+    networks:
+      - fastapi-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: "always"
+    ports:
+      - "127.0.0.1:5555:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - fastapi-network
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./init_scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s      # Интервал между проверками (увеличьте до 10 секунд)
+      timeout: 5s       # Таймаут проверки
+      retries: 10
+
+networks:
+  fastapi-network:
+    driver: bridge
