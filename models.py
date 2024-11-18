@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, Date
+from sqlalchemy import Column, Integer, Float, String, Date, UniqueConstraint
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -10,3 +10,7 @@ class CargoRate(Base):
     cargo_type = Column(String,nullable=False)
     date = Column(Date, nullable=False)
     rate = Column(Float, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('date', 'cargo_type', name='uix_date_cargo_type'),
+    )

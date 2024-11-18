@@ -1,6 +1,9 @@
-from pydantic import BaseModel, PositiveInt, RootModel
+from pydantic import BaseModel, PositiveInt, RootModel, constr
 from typing import List, Dict
 from datetime import date
+
+
+rate_regex= r"^\d+(\.\d+)?$"
 
 # Определение Item модели
 class Item(BaseModel):
@@ -11,8 +14,8 @@ class Item(BaseModel):
 # Определение RateItem модели
 class RateItem(BaseModel):
     cargo_type: str
-    rate: str
+    rate: constr(pattern=rate_regex)
 
-# Определение модели с корневым полем (RatesByDate)
+
 class RatesByDate(RootModel):
     root: Dict[date, List[RateItem]]

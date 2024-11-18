@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    restart: "no"
+    restart: "always"
     networks:
       - fastapi-network
 
@@ -33,10 +33,10 @@ services:
       - ./db:/var/lib/postgresql/data
       - ./init_scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s      # Интервал между проверками (увеличьте до 10 секунд)
-      timeout: 5s       # Таймаут проверки
-      retries: 10
+      test: ["CMD-SHELL", "export PGPASSWORD=${DB_PASS} && psql -U ${DB_USER} -d ${DB_NAME} -h db -p ${DB_PORT} -c 'SELECT 1;'"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
 
 networks:
   fastapi-network:
