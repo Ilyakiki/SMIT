@@ -1,11 +1,10 @@
 import uvicorn
-from fastapi import FastAPI, Depends, Query, APIRouter, HTTPException
-from typing import Optional,List
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import init_database,get_async_session
+from database import init_database, get_async_session
 from schemas import *
 from models import CargoRate
 app = FastAPI()
@@ -38,7 +37,7 @@ async def insert_rates(rates:RatesByDate, session:AsyncSession = Depends(get_asy
 
             await session.execute(insert_stmt)
     await session.commit()
-    return {"ok":"ok"}
+    return {"message": "OK"}, status.HTTP_200_OK
 
 @app.post("/get_price")
 async def get_price(item:Item, session:AsyncSession = Depends(get_async_session)):

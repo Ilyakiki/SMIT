@@ -13,8 +13,8 @@ class Item(BaseModel):
 
 # Определение RateItem модели
 class RateItem(BaseModel):
-    cargo_type: str
-    rate: constr(pattern=rate_regex)
+    cargo_type: str = "Other"
+    rate: constr(pattern=rate_regex) = 0.5
 
 
 class RatesByDate(RootModel):

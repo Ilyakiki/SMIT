@@ -1,14 +1,30 @@
 version: "3.8"
 
 services:
+  test:
+    build:
+      context: .
+      target: test
+    container_name: fastapi_tests
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - fastapi-network
+    entrypoint: ["pytest", "test_app.py", "--asyncio-mode=auto"]
+
   web:
-    build: .
+    build:
+      context: .
+      target: production
     container_name: fastapi_app
     ports:
       - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      test:
+        condition: service_completed_successfully
     env_file:
       - .env
     restart: "always"
@@ -20,7 +36,7 @@ services:
     container_name: postgres_db
     restart: "always"
     ports:
-      - "127.0.0.1:5555:5432"
+      - "127.0.0.1:5555:${DB_PORT}"
     env_file:
       - .env
     environment:
@@ -33,11 +49,10 @@ services:
       - ./db:/var/lib/postgresql/data
       - ./init_scripts:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "export PGPASSWORD=${DB_PASS} && psql -U ${DB_USER} -d ${DB_NAME} -h db -p ${DB_PORT} -c 'SELECT 1;'"]
-      interval: 10s
-      timeout: 10s
-      retries: 20
-
+      test: ["CMD-SHELL", "pg_isready -p ${DB_PORT} -d ${DB_NAME} -U ${DB_USER}"]
+      interval: 5s
+      retries: 3
+      timeout: 5s
 networks:
   fastapi-network:
     driver: bridge

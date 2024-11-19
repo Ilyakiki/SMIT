@@ -1,6 +1,9 @@
 from typing import AsyncGenerator
 from sqlalchemy import MetaData
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+import asyncio
+
 from configuration import *
 from models import *
 
